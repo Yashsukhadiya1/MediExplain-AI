@@ -80,3 +80,12 @@ MediExplain is a calm, trustworthy educational medical-report simplification web
 ## 🔒 Medical Disclaimer & Safety
 
 **Important:** MediExplain provides educational explanations of information contained in medical reports. It does not diagnose medical conditions, prescribe treatment, or replace professional medical advice. An out-of-range result does not by itself confirm a medical condition. Always discuss test results with a qualified healthcare professional.
+
+---
+
+## 👨‍💻 Author
+
+- **Name:** Yash Sukhadiya
+- **Email:** 23amtics020@gmail.com
+- **Project:** 7th Semester - MediExplain-AI
+

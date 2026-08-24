@@ -2,6 +2,7 @@
   "name": "mediexplain-ai",
   "private": true,
   "version": "1.0.0",
+  "author": "Yash Sukhadiya",
   "type": "module",
   "scripts": {
     "dev": "vite",

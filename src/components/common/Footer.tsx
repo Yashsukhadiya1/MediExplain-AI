@@ -52,7 +52,7 @@ export const Footer: React.FC<FooterProps> = ({
         </div>
 
         <div className="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
-          <p>© {new Date().getFullYear()} MediExplain. Designed for medical literacy and clarity.</p>
+          <p>© {new Date().getFullYear()} MediExplain. Developed by Yash Sukhadiya. Designed for medical literacy and clarity.</p>
         </div>
       </div>
     </footer>
