@@ -1,6 +1,6 @@
 import { ReportData } from '../types/report';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://mediexplain-backend-8ic7.onrender.com';
+const API_BASE_URL = 'https://mediexplain-backend-8ic7.onrender.com';
 
 export async function analyzeReport(file: File): Promise<ReportData> {
   const formData = new FormData();
