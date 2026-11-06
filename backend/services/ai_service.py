@@ -255,7 +255,7 @@ def analyze_report_with_gemini(
             user_prompt = f"Please analyze the following extracted medical report text and return the structured JSON analysis:\n\n--- REPORT TEXT START ---\n{extracted_text}\n--- REPORT TEXT END ---"
             contents.append(user_prompt)
 
-        model_name = "gemini-3.6-flash"
+        model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         response = client.models.generate_content(
             model=model_name,
             contents=contents,
@@ -269,8 +269,9 @@ def analyze_report_with_gemini(
         try:
             import google.generativeai as genai_legacy
             genai_legacy.configure(api_key=api_key)
+            fallback_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
             model = genai_legacy.GenerativeModel(
-                model_name="gemini-3.6-flash",
+                model_name=fallback_model,
                 generation_config={"response_mime_type": "application/json"}
             )
             if use_image_mode and image_bytes:
@@ -332,8 +333,9 @@ Please provide a clear, educational, and empathetic response grounded in this re
     try:
         from google import genai
         client = genai.Client(api_key=api_key)
+        qa_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         response = client.models.generate_content(
-            model="gemini-3.6-flash",
+            model=qa_model,
             contents=prompt
         )
         return response.text.strip()
@@ -341,7 +343,8 @@ Please provide a clear, educational, and empathetic response grounded in this re
         try:
             import google.generativeai as genai_legacy
             genai_legacy.configure(api_key=api_key)
-            model = genai_legacy.GenerativeModel(model_name="gemini-3.6-flash")
+            fallback_qa_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            model = genai_legacy.GenerativeModel(model_name=fallback_qa_model)
             response = model.generate_content(prompt)
             return response.text.strip()
         except Exception as e_leg:
