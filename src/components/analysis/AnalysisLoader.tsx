@@ -7,8 +7,8 @@ interface AnalysisLoaderProps {
 }
 
 const STEPS = [
-  { id: 1, label: 'Reading your report...' },
-  { id: 2, label: 'Extracting the results & reference ranges...' },
+  { id: 1, label: 'Reading your report & validating document...' },
+  { id: 2, label: 'Extracting tests & reference ranges...' },
   { id: 3, label: 'Structuring educational explanation...' },
 ];
 
@@ -17,10 +17,10 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Advance steps smoothly while backend completes
+  // Advance steps smoothly while backend completes (approx 4-7 seconds total)
   useEffect(() => {
-    const timer1 = setTimeout(() => setCurrentStep(2), 1500);
-    const timer2 = setTimeout(() => setCurrentStep(3), 3500);
+    const timer1 = setTimeout(() => setCurrentStep(2), 1200);
+    const timer2 = setTimeout(() => setCurrentStep(3), 2800);
 
     return () => {
       clearTimeout(timer1);
@@ -48,7 +48,7 @@ export const AnalysisLoader: React.FC<AnalysisLoaderProps> = ({
             </h2>
             <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
               <Sparkles className="h-3 w-3 text-cyan-600" />
-              <span>AI processing • Usually takes 5-10 seconds</span>
+              <span>Fast AI processing • Usually takes 5-8 seconds</span>
             </p>
           </div>
         </div>

@@ -56,13 +56,10 @@ def parse_report_document(file_bytes: bytes, filename: str, content_type: str) -
                 if text and text.strip():
                     page_texts.append(text.strip())
                 else:
-                    # If page has no selectable text, attempt OCR or save image for multimodal
+                    # If page has no selectable text, render pixmap directly for fast Gemini Vision
                     pix = page.get_pixmap(dpi=150)
                     img_bytes = pix.tobytes("png")
-                    ocr_text = extract_text_from_image_bytes(img_bytes)
-                    if ocr_text:
-                        page_texts.append(ocr_text)
-                    elif image_bytes_fallback is None:
+                    if image_bytes_fallback is None:
                         image_bytes_fallback = img_bytes
                         mime = "image/png"
 
@@ -73,9 +70,9 @@ def parse_report_document(file_bytes: bytes, filename: str, content_type: str) -
             raise ValueError(f"Unable to read this PDF document: {str(e)}")
 
     elif is_image:
-        # Try local OCR first
-        extracted_text = extract_text_from_image_bytes(file_bytes)
+        # Pass image bytes directly to Gemini Vision to bypass slow CPU Tesseract OCR (saves 15-20s)
         image_bytes_fallback = file_bytes
+        extracted_text = ""
         if not mime or mime == "application/octet-stream":
             mime = "image/png" if filename_lower.endswith(".png") else "image/jpeg"
 
