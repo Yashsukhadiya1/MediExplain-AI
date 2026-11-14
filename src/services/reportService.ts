@@ -1,6 +1,25 @@
 import { ReportData } from '../types/report';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+function getApiBaseUrl(): string {
+  // 1. Explicit environment variable override if set
+  const envUrl = (import.meta as any).env?.VITE_API_BASE_URL || (import.meta as any).env?.VITE_API_URL;
+  if (envUrl) {
+    return envUrl;
+  }
+
+  // 2. When running locally in browser (localhost / 127.0.0.1)
+  if (typeof window !== 'undefined') {
+    const { hostname } = window.location;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:8000';
+    }
+  }
+
+  // 3. Fallback for deployed production environments
+  return 'https://mediexplain-backend-8ic7.onrender.com';
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 export async function analyzeReport(file: File): Promise<ReportData> {
   const formData = new FormData();
@@ -28,11 +47,11 @@ export async function analyzeReport(file: File): Promise<ReportData> {
     const data: ReportData = await response.json();
     return data;
   } catch (error: any) {
-    if (error.message && !error.message.includes('Failed to fetch')) {
+    if (error.message && !error.message.includes('Failed to fetch') && !error.message.includes('NetworkError')) {
       throw error;
     }
     throw new Error(
-      'Could not connect to the analysis service. Please ensure the MediExplain backend is running on port 8000.'
+      `Could not connect to the analysis service at ${API_BASE_URL}. Please ensure the MediExplain backend is running on port 8000.`
     );
   }
 }
@@ -63,11 +82,11 @@ export async function askAboutReport(question: string, report: ReportData): Prom
     const data = await response.json();
     return data.answer || 'No answer could be generated.';
   } catch (error: any) {
-    if (error.message && !error.message.includes('Failed to fetch')) {
+    if (error.message && !error.message.includes('Failed to fetch') && !error.message.includes('NetworkError')) {
       throw error;
     }
     throw new Error(
-      'Could not reach the question assistant. Please verify the backend server is active.'
+      `Could not reach the question assistant at ${API_BASE_URL}. Please verify the backend server is active.`
     );
   }
 }

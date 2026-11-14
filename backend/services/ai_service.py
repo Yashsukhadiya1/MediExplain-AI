@@ -220,6 +220,8 @@ def normalize_report_json(data: Any, filename: str = "", filesize: str = "") -> 
         "fileSize": filesize if filesize else None
     }
 
+MODELS_TO_TRY = ["gemini-3.6-flash", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-2.5-flash-lite"]
+
 def analyze_report_with_gemini(
     extracted_text: str = "",
     image_bytes: Optional[bytes] = None,
@@ -238,58 +240,87 @@ def analyze_report_with_gemini(
 
     raw_response_text = ""
 
-    # Check whether we have direct text or need image multimodal analysis
-    use_image_mode = bool(image_bytes and (not extracted_text or len(extracted_text.strip()) < 10))
-
     try:
         from google import genai
         from google.genai import types
         client = genai.Client(api_key=api_key)
 
         contents = [EXTRACTION_SYSTEM_PROMPT]
-        if use_image_mode and image_bytes:
+        if image_bytes:
             image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
             contents.append(image_part)
-            contents.append("Please inspect and analyze this medical report image thoroughly according to your instructions and return structured JSON.")
+            if extracted_text and len(extracted_text.strip()) > 10:
+                contents.append(
+                    f"Please inspect and analyze this medical report image thoroughly according to your instructions.\n"
+                    f"Supplementary OCR text extracted from document:\n{extracted_text}\n\n"
+                    f"Return structured JSON adhering strictly to the required schema."
+                )
+            else:
+                contents.append(
+                    "Please inspect and analyze this medical report image thoroughly according to your instructions and return structured JSON."
+                )
         else:
             user_prompt = f"Please analyze the following extracted medical report text and return the structured JSON analysis:\n\n--- REPORT TEXT START ---\n{extracted_text}\n--- REPORT TEXT END ---"
             contents.append(user_prompt)
 
-        model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-        response = client.models.generate_content(
-            model=model_name,
-            contents=contents,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json"
-            )
-        )
-        raw_response_text = response.text
+        last_error = None
+        for model_name in MODELS_TO_TRY:
+            try:
+                logger.info(f"Attempting report analysis using model: {model_name}")
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=contents,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json"
+                    )
+                )
+                if response and response.text:
+                    raw_response_text = response.text
+                    logger.info(f"Successfully received analysis from {model_name}")
+                    break
+            except Exception as e_model:
+                logger.warning(f"Model {model_name} failed: {e_model}. Trying next candidate...")
+                last_error = e_model
+                continue
+
+        if not raw_response_text and last_error:
+            raise last_error
+
     except Exception as e_new:
         logger.warning(f"google.genai attempt failed: {e_new}. Trying fallback...")
         try:
             import google.generativeai as genai_legacy
             genai_legacy.configure(api_key=api_key)
-            fallback_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
-            model = genai_legacy.GenerativeModel(
-                model_name=fallback_model,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            if use_image_mode and image_bytes:
-                pil_img = Image.open(io.BytesIO(image_bytes))
-                response = model.generate_content([
-                    EXTRACTION_SYSTEM_PROMPT,
-                    pil_img,
-                    "Analyze this medical report image and return structured JSON."
-                ])
-            else:
-                user_prompt = f"Please analyze the following extracted medical report text and return the structured JSON analysis:\n\n--- REPORT TEXT START ---\n{extracted_text}\n--- REPORT TEXT END ---"
-                response = model.generate_content([EXTRACTION_SYSTEM_PROMPT + "\n\n" + user_prompt])
-            raw_response_text = response.text
+            last_leg_error = None
+            for model_name in MODELS_TO_TRY:
+                try:
+                    model = genai_legacy.GenerativeModel(
+                        model_name=model_name,
+                        generation_config={"response_mime_type": "application/json"}
+                    )
+                    if image_bytes:
+                        pil_img = Image.open(io.BytesIO(image_bytes))
+                        response = model.generate_content([
+                            EXTRACTION_SYSTEM_PROMPT,
+                            pil_img,
+                            "Analyze this medical report image and return structured JSON adhering to the required schema."
+                        ])
+                    else:
+                        user_prompt = f"Please analyze the following extracted medical report text and return the structured JSON analysis:\n\n--- REPORT TEXT START ---\n{extracted_text}\n--- REPORT TEXT END ---"
+                        response = model.generate_content([EXTRACTION_SYSTEM_PROMPT + "\n\n" + user_prompt])
+                    if response and response.text:
+                        raw_response_text = response.text
+                        break
+                except Exception as leg_m_err:
+                    last_leg_error = leg_m_err
+                    continue
+            if not raw_response_text and last_leg_error:
+                raise last_leg_error
         except Exception as e_leg:
             logger.error(f"Gemini API request failed. Technical details: {e_new} | {e_leg}")
             if "API key not valid" in str(e_new) or "API_KEY_INVALID" in str(e_new) or "400" in str(e_new) or "INVALID_ARGUMENT" in str(e_new):
                 raise ValueError("AI analysis couldn't be completed. Please check the Gemini API configuration in backend/.env and try again.")
-            raise ValueError("AI analysis couldn't be completed. Please check the Gemini API configuration and try again.")
+            raise ValueError(f"AI analysis couldn't be completed: {str(e_new)}")
 
     # Clean and parse JSON
     try:
@@ -333,20 +364,31 @@ Please provide a clear, educational, and empathetic response grounded in this re
     try:
         from google import genai
         client = genai.Client(api_key=api_key)
-        qa_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-        response = client.models.generate_content(
-            model=qa_model,
-            contents=prompt
-        )
-        return response.text.strip()
+        for model_name in MODELS_TO_TRY:
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt
+                )
+                if response and response.text:
+                    return response.text.strip()
+            except Exception as e_m:
+                logger.warning(f"QA attempt with {model_name} failed: {e_m}")
+                continue
+        raise ValueError("Could not get an answer from available Gemini models.")
     except Exception as e_new:
         try:
             import google.generativeai as genai_legacy
             genai_legacy.configure(api_key=api_key)
-            fallback_qa_model = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
-            model = genai_legacy.GenerativeModel(model_name=fallback_qa_model)
-            response = model.generate_content(prompt)
-            return response.text.strip()
+            for model_name in MODELS_TO_TRY:
+                try:
+                    model = genai_legacy.GenerativeModel(model_name=model_name)
+                    response = model.generate_content(prompt)
+                    if response and response.text:
+                        return response.text.strip()
+                except Exception:
+                    continue
+            raise ValueError("All fallback legacy models failed.")
         except Exception as e_leg:
             logger.error(f"Gemini QA error: {e_leg}")
             raise ValueError("Unable to generate an answer at this time. Please check the Gemini API configuration and try again.")
