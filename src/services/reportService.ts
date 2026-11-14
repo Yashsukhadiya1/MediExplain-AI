@@ -1,8 +1,8 @@
 import { ReportData } from '../types/report';
 
 function getApiBaseUrl(): string {
-  // 1. Explicit environment variable override if set
-  const envUrl = (import.meta as any).env?.VITE_API_BASE_URL || (import.meta as any).env?.VITE_API_URL;
+  // 1. Explicit environment variable override (direct access for Vite static replacement)
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
   if (envUrl) {
     return envUrl;
   }
@@ -15,8 +15,8 @@ function getApiBaseUrl(): string {
     }
   }
 
-  // 3. Fallback for deployed production environments
-  return 'https://mediexplain-backend-8ic7.onrender.com';
+  // 3. Live Render production backend URL
+  return 'https://mediexplain-ai-ru78.onrender.com';
 }
 
 const API_BASE_URL = getApiBaseUrl();
