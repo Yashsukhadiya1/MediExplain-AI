@@ -44,7 +44,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <div className="grid grid-cols-3 gap-2 sm:gap-4">
       {cards.map((card) => {
         const isSelected = selectedFilter === card.id;
         const Icon = card.icon;
@@ -54,29 +54,29 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
             key={card.id}
             type="button"
             onClick={() => onSelectFilter(card.id)}
-            className={`text-left rounded-2xl border p-5 transition-all duration-300 glass-card glass-card-hover group relative overflow-hidden ${
+            className={`text-left rounded-xl sm:rounded-2xl border p-2.5 sm:p-5 transition-all duration-300 glass-card glass-card-hover group relative overflow-hidden ${
               isSelected ? card.activeRing : 'border-slate-200/80 bg-white/80'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider block truncate">
                 {card.label}
               </span>
-              <div className={`flex h-8 w-8 items-center justify-center rounded-xl border ${card.accentColor} shadow-2xs group-hover:scale-110 transition-transform`}>
-                <Icon className="h-4 w-4" />
+              <div className={`flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-lg sm:rounded-xl border ${card.accentColor} shadow-2xs group-hover:scale-110 transition-transform shrink-0`}>
+                <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
               </div>
             </div>
 
-            <span className="text-3xl font-extrabold tracking-tight text-slate-900 mt-2 block">
+            <span className="text-lg sm:text-3xl font-black tracking-tight text-slate-900 mt-1 sm:mt-2 block">
               {card.count}
             </span>
 
-            <div className="flex items-center justify-between mt-1.5 pt-2 border-t border-slate-100">
-              <span className="text-xs text-slate-500 font-medium">
+            <div className="flex items-center justify-between mt-1 sm:mt-1.5 pt-1.5 sm:pt-2 border-t border-slate-100">
+              <span className="hidden sm:block text-xs text-slate-500 font-medium truncate">
                 {card.detail}
               </span>
-              <span className={`text-[11px] font-bold ${isSelected ? 'text-teal-700 font-extrabold' : 'text-slate-400 group-hover:text-slate-600'} transition-colors`}>
-                {isSelected ? 'Active Filter' : 'Filter'}
+              <span className={`text-[9px] sm:text-[11px] font-bold ${isSelected ? 'text-teal-700 font-extrabold' : 'text-slate-400 group-hover:text-slate-600'} transition-colors truncate`}>
+                {isSelected ? 'Active' : 'Filter'}
               </span>
             </div>
           </button>

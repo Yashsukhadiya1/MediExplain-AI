@@ -141,10 +141,10 @@ export const ReportChat: React.FC<ReportChatProps> = ({
         }`}
       />
 
-      {/* Slide-over Right Drawer */}
+      {/* Slide-over Right Drawer - Starts below header on mobile (top-16) to avoid navbar collision */}
       <div
-        style={{ width: typeof window !== 'undefined' && window.innerWidth < 640 ? '100%' : `${drawerWidth}px` }}
-        className={`fixed inset-y-0 right-0 z-50 flex flex-col bg-white shadow-2xl border-l border-teal-100 transition-transform duration-300 ease-in-out text-left select-text ${
+        style={{ width: typeof window !== 'undefined' && window.innerWidth < 640 ? '100%' : `${drawerWidth}px`, maxWidth: '100vw' }}
+        className={`fixed top-16 sm:top-0 bottom-0 right-0 z-50 flex flex-col bg-white shadow-2xl border-l border-teal-100 transition-transform duration-300 ease-in-out text-left select-text ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -157,27 +157,27 @@ export const ReportChat: React.FC<ReportChatProps> = ({
           <div className="h-8 w-1 rounded-full bg-slate-300 group-hover:bg-teal-600 transition-colors" />
         </div>
 
-        {/* Drawer Header */}
-        <div className="border-b border-teal-100/80 bg-gradient-to-r from-teal-50/70 via-cyan-50/50 to-white p-4 sm:p-4.5 flex items-center justify-between shrink-0 shadow-2xs">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-700 via-teal-600 to-cyan-600 text-white shadow-md shadow-teal-700/20 shrink-0">
-              <Bot className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+        {/* Drawer Header - Compact on mobile */}
+        <div className="border-b border-teal-100/80 bg-gradient-to-r from-teal-50/70 via-cyan-50/50 to-white p-2.5 sm:p-4 flex items-center justify-between shrink-0 shadow-2xs">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-700 via-teal-600 to-cyan-600 text-white shadow-md shadow-teal-700/20 shrink-0">
+              <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="absolute -top-1 -right-1 flex h-2 w-2 sm:h-2.5 sm:w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-cyan-400"></span>
               </span>
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 truncate">
+                <h3 className="text-xs sm:text-base font-extrabold text-slate-900 truncate">
                   MediExplain Assistant
                 </h3>
-                <span className="inline-flex items-center gap-0.5 rounded-full bg-teal-100/90 px-2 py-0.5 text-[10px] font-bold text-teal-800">
-                  <Sparkles className="h-2.5 w-2.5 text-teal-600" /> AI
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-teal-100/90 px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold text-teal-800">
+                  <Sparkles className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-teal-600" /> AI
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 truncate">
-                Grounded in your uploaded medical report
+              <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+                Grounded in your report data
               </p>
             </div>
           </div>
@@ -198,16 +198,16 @@ export const ReportChat: React.FC<ReportChatProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+              className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
               title="Close assistant (Esc)"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         </div>
 
-        {/* Chat Messages Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-gradient-to-b from-slate-50/60 to-white">
+        {/* Chat Messages Body with overscroll containment */}
+        <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-4 overscroll-contain bg-gradient-to-b from-slate-50/60 to-white">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center p-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 mb-3 border border-teal-200/60 shadow-2xs">
@@ -301,14 +301,14 @@ export const ReportChat: React.FC<ReportChatProps> = ({
           </div>
         )}
 
-        {/* Input Bar pinned to the bottom */}
-        <div className="border-t border-teal-100 bg-white p-3.5 sm:p-4 shrink-0 shadow-xs">
+        {/* Input Bar pinned to the bottom - Ultra compact on mobile to avoid keyboard lag */}
+        <div className="border-t border-teal-100 bg-white p-2 sm:p-3.5 shrink-0 shadow-xs pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSend();
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1.5 sm:gap-2"
           >
             <input
               type="text"
@@ -316,15 +316,16 @@ export const ReportChat: React.FC<ReportChatProps> = ({
               value={inputQuery}
               onChange={(e) => setInputQuery(e.target.value)}
               disabled={isLoading}
-              className="flex-1 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:outline-hidden transition-all"
+              className="flex-1 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:outline-hidden transition-all"
             />
             <button
               type="submit"
               disabled={!inputQuery.trim() || isLoading}
-              className="btn-shimmer inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-700 to-cyan-600 px-4.5 py-2.5 text-xs font-bold text-white shadow-md shadow-teal-700/20 hover:shadow-lg disabled:opacity-40 transition-all active:scale-95"
+              className="btn-shimmer inline-flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-teal-700 to-cyan-600 px-3 py-2 sm:px-4 sm:py-2 text-xs font-bold text-white shadow-md shadow-teal-700/20 hover:shadow-lg disabled:opacity-40 transition-all active:scale-95 shrink-0"
+              title="Send question"
             >
               <Send className="h-3.5 w-3.5" />
-              <span>Ask</span>
+              <span className="hidden sm:inline">Ask</span>
             </button>
           </form>
         </div>

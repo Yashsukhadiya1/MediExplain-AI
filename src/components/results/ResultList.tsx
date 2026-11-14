@@ -110,14 +110,14 @@ export const ResultList: React.FC<ResultListProps> = ({
         </div>
 
         {/* Clean Modern Results Table */}
-        <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white/60">
-          <table className="w-full text-left text-xs sm:text-sm">
+        <div className="overflow-x-auto rounded-xl border border-slate-100 bg-white/60 -mx-1 sm:mx-0">
+          <table className="w-full min-w-[460px] text-left text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/70 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-4">Test</th>
-                <th className="py-3 px-4">Your result</th>
-                <th className="py-3 px-4">Reference range</th>
-                <th className="py-3 px-4 text-right">Status</th>
+                <th className="py-3 px-3.5 sm:px-4">Test</th>
+                <th className="py-3 px-3.5 sm:px-4">Your result</th>
+                <th className="py-3 px-3.5 sm:px-4">Reference range</th>
+                <th className="py-3 px-3.5 sm:px-4 text-right">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/80">
@@ -132,17 +132,17 @@ export const ResultList: React.FC<ResultListProps> = ({
                   const statusInfo = getStatusDetails(test.status);
                   return (
                     <tr key={`row-${index}`} className="hover:bg-teal-50/30 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-slate-900">
+                      <td className="py-3 px-3.5 sm:px-4 font-bold text-slate-900">
                         {test.name}
                       </td>
-                      <td className="py-3.5 px-4 font-black text-slate-900">
+                      <td className="py-3 px-3.5 sm:px-4 font-black text-slate-900">
                         {test.result} <span className="font-normal text-slate-500 text-xs">{test.unit}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-600 font-medium">
+                      <td className="py-3 px-3.5 sm:px-4 text-slate-600 font-medium">
                         {test.referenceRange} {test.unit && test.referenceRange !== 'Reference range unavailable' ? test.unit : ''}
                       </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${statusInfo.badgeBg} shadow-2xs`}>
+                      <td className="py-3 px-3.5 sm:px-4 text-right">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${statusInfo.badgeBg} shadow-2xs whitespace-nowrap`}>
                           <span>{statusInfo.symbol}</span>
                           <span>{statusInfo.label}</span>
                         </span>
@@ -160,14 +160,14 @@ export const ResultList: React.FC<ResultListProps> = ({
       <div className="space-y-4">
         <div className="border-b border-slate-200/80 pb-3 flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-extrabold text-slate-900">
+            <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
               What do these results mean?
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Clear, educational explanations of individual test items.
             </p>
           </div>
-          <span className="text-xs font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200/60">
+          <span className="text-xs font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200/60 shrink-0">
             {filteredResults.length} Tests
           </span>
         </div>
@@ -184,24 +184,24 @@ export const ResultList: React.FC<ResultListProps> = ({
               >
                 {/* Card Header */}
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-base font-extrabold text-slate-900">
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="text-sm sm:text-base font-extrabold text-slate-900 break-words">
                         {test.name}
                       </h4>
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${statusInfo.badgeBg} shadow-2xs`}>
+                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${statusInfo.badgeBg} shadow-2xs shrink-0 whitespace-nowrap`}>
                         <span>{statusInfo.symbol}</span>
                         <span>{statusInfo.label}</span>
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-slate-600">
                       <span>
                         Result: <strong className="text-slate-900 font-extrabold">{test.result} {test.unit}</strong>
                       </span>
-                      <span>•</span>
+                      <span className="text-slate-300">•</span>
                       <span>
-                        Reference range: <span className="font-semibold text-slate-700">{test.referenceRange} {test.unit && test.referenceRange !== 'Reference range unavailable' ? test.unit : ''}</span>
+                        Reference: <span className="font-semibold text-slate-700">{test.referenceRange} {test.unit && test.referenceRange !== 'Reference range unavailable' ? test.unit : ''}</span>
                       </span>
                     </div>
                   </div>
@@ -209,9 +209,9 @@ export const ResultList: React.FC<ResultListProps> = ({
                   <button
                     type="button"
                     onClick={() => toggleExpand(test.name)}
-                    className="inline-flex items-center gap-1.5 self-start rounded-xl border border-slate-200 bg-white/90 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-2xs active:scale-95"
+                    className="inline-flex items-center gap-1.5 self-start rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-2xs active:scale-95 shrink-0"
                   >
-                    <span>{isExpanded ? 'Hide details' : 'Learn more'}</span>
+                    <span>{isExpanded ? 'Hide' : 'Learn more'}</span>
                     {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-teal-700" /> : <ChevronDown className="h-3.5 w-3.5 text-teal-700" />}
                   </button>
                 </div>
