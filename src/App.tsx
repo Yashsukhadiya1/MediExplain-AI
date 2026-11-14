@@ -38,7 +38,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-50 medical-mesh-bg font-sans text-slate-900 selection:bg-teal-500 selection:text-white">
       {/* Header */}
       <Header
         currentPage={currentPage}

@@ -9,46 +9,114 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 selection:bg-teal-100 selection:text-teal-900;
+    @apply bg-slate-50 text-slate-900 selection:bg-teal-500 selection:text-white antialiased;
+    overflow-x: hidden;
   }
 }
 
-/* Glassmorphism & custom utility classes */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+/* Glassmorphism styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
 }
 
-.medical-gradient-bg {
-  background: radial-gradient(circle at 10% 20%, rgba(204, 251, 241, 0.4) 0%, rgba(224, 239, 254, 0.5) 40%, rgba(248, 250, 252, 1) 90%);
+.glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card-hover:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20px 35px -10px rgba(13, 148, 136, 0.12), 0 8px 16px -4px rgba(15, 23, 42, 0.04);
+  border-color: rgba(45, 212, 191, 0.4);
 }
 
-.medical-card-shadow {
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+.glass-pill {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
-.medical-card-shadow-hover {
-  transition: all 0.25s ease;
-}
-.medical-card-shadow-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.03);
+/* Dynamic Gradient Backgrounds */
+.medical-mesh-bg {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(204, 251, 241, 0.45) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(224, 239, 254, 0.5) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(240, 253, 250, 0.3) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(204, 251, 241, 0.35) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(224, 242, 254, 0.4) 0px, transparent 50%);
 }
 
-/* Custom scrollbar for chat and tables */
+.gradient-text {
+  @apply bg-gradient-to-r from-teal-800 via-teal-600 to-cyan-600 bg-clip-text text-transparent;
+}
+
+.gradient-text-vibrant {
+  @apply bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent;
+}
+
+/* ECG Heartbeat animated line */
+@keyframes ecgLine {
+  0% {
+    stroke-dashoffset: 1000;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-ecg {
+  stroke-dasharray: 1000;
+  animation: ecgLine 3.5s ease-in-out infinite alternate;
+}
+
+/* Shimmer button animation */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 80%
+  );
+  transform: rotate(30deg);
+  animation: shimmerMove 3.5s infinite;
+}
+
+@keyframes shimmerMove {
+  0% {
+    transform: translateX(-100%) rotate(30deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(30deg);
+  }
+}
+
+/* Custom modern scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+  background: rgba(241, 245, 249, 0.8);
 }
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 4px;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #0d9488;
 }

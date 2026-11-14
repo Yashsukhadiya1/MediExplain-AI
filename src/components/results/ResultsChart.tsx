@@ -31,7 +31,7 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({ results }) => {
 
   if (numericResults.length < 2) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-5 text-center">
+      <div className="glass-card rounded-2xl p-6 text-center border border-white/90">
         <p className="text-xs text-slate-500">
           Not enough numeric data with stated reference ranges for chart visualization.
         </p>
@@ -49,56 +49,57 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({ results }) => {
   }));
 
   const getColor = (status: string) => {
-    if (status === 'within_range') return '#047857'; // emerald-700
-    if (status === 'needs_attention' || status === 'important') return '#b45309'; // amber-700
+    if (status === 'within_range') return '#10b981'; // emerald-500
+    if (status === 'needs_attention' || status === 'important') return '#f59e0b'; // amber-500
     return '#64748b'; // slate-500
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-2xs">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-        <div className="flex items-center gap-2">
-          <BarChart2 className="h-4 w-4 text-teal-700" />
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">
-            Selected Measured Results
-          </h3>
+    <div className="glass-card rounded-2xl p-6 sm:p-7 shadow-xl shadow-teal-950/5 border border-white/90 text-left">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
+            <BarChart2 className="h-4 w-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-800">
+              Numeric Results Distribution
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Comparison of reported numeric values (Green: Within range, Amber: Outside range)
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-700" /> Within range
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-amber-700" /> Needs attention
-          </span>
-        </div>
+
+        <span className="text-xs font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200/50 hidden sm:inline-block">
+          Interactive Chart
+        </span>
       </div>
 
-      <div className="h-60 w-full">
+      <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+          <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
             <XAxis
               dataKey="name"
-              tick={{ fontSize: 11, fill: '#475569' }}
-              tickLine={false}
-              axisLine={{ stroke: '#cbd5e1' }}
+              tick={{ fontSize: 11, fill: '#64748b', fontWeight: 600 }}
               interval={0}
-              angle={-10}
+              angle={-20}
               textAnchor="end"
             />
-            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} tickLine={false} axisLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
             <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
-                  const d = payload[0].payload;
+                  const data = payload[0].payload;
                   return (
-                    <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-md text-xs space-y-1">
-                      <p className="font-bold text-slate-900">{d.fullName}</p>
-                      <p className="text-slate-600">
-                        Result: <strong className="text-slate-900">{d.result} {d.unit}</strong>
+                    <div className="glass-card rounded-xl border border-teal-100 p-3 shadow-lg text-xs space-y-1">
+                      <p className="font-extrabold text-slate-900">{data.fullName}</p>
+                      <p className="text-slate-700">
+                        Result: <span className="font-black text-teal-800">{data.result} {data.unit}</span>
                       </p>
-                      <p className="text-slate-500">
-                        Reference Range: {d.referenceRange} {d.unit}
+                      <p className="text-slate-500 text-[11px]">
+                        Reference: {data.referenceRange}
                       </p>
                     </div>
                   );
@@ -106,7 +107,7 @@ export const ResultsChart: React.FC<ResultsChartProps> = ({ results }) => {
                 return null;
               }}
             />
-            <Bar dataKey="result" radius={[4, 4, 0, 0]} maxBarSize={40}>
+            <Bar dataKey="result" radius={[6, 6, 0, 0]}>
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={getColor(entry.status)} />
               ))}

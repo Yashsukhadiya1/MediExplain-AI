@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, HelpCircle, MessageSquare } from 'lucide-react';
+import { Send, Loader2, HelpCircle, Bot, User, Sparkles } from 'lucide-react';
 import { ReportData, ChatMessage } from '../../types/report';
 import { askAboutReport } from '../../services/reportService';
 
@@ -68,41 +68,50 @@ export const ReportChat: React.FC<ReportChatProps> = ({ report, initialQuestion 
   };
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden text-left">
+    <div className="glass-card rounded-2xl border border-white/90 shadow-xl shadow-teal-950/5 overflow-hidden text-left">
       {/* Header */}
-      <div className="border-b border-slate-200 bg-slate-50 p-4 flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-teal-800" />
-            <h3 className="text-sm font-bold text-slate-900">
-              Ask about your report
-            </h3>
+      <div className="border-b border-teal-100/70 bg-gradient-to-r from-teal-50/60 to-cyan-50/40 p-4.5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-700 to-cyan-600 text-white shadow-xs">
+            <Bot className="h-5 w-5" />
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Ask specific questions about the values, terms, or reference ranges in your uploaded report.
-          </p>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-sm font-extrabold text-slate-900">
+                Ask MediExplain Assistant
+              </h3>
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-teal-100/80 px-2 py-0.5 text-[10px] font-bold text-teal-800">
+                <Sparkles className="h-2.5 w-2.5 text-teal-600" /> AI
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Ask specific questions about the values, terms, or reference ranges in your uploaded report.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Chat Area */}
-      <div className="h-[320px] overflow-y-auto p-4 space-y-3 bg-slate-50/40">
+      <div className="h-[340px] overflow-y-auto p-4 sm:p-5 space-y-3.5 bg-slate-50/50">
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center p-4">
-            <HelpCircle className="h-8 w-8 text-teal-700/60 mb-2" />
-            <p className="text-xs font-semibold text-slate-800">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 mb-3 border border-teal-200/60 shadow-2xs">
+              <HelpCircle className="h-6 w-6" />
+            </div>
+            <p className="text-sm font-bold text-slate-900">
               Have questions about this report?
             </p>
-            <p className="text-[11px] text-slate-500 max-w-sm mt-1">
-              Select one of the example questions below or type your own question.
+            <p className="text-xs text-slate-500 max-w-sm mt-1">
+              Select one of the suggested questions below or type any question in your mind.
             </p>
 
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <div className="mt-5 flex flex-wrap justify-center gap-2 max-w-md">
               {SUGGESTED_QUESTIONS.map((q, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => handleSend(q)}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:border-teal-700 hover:text-slate-900 transition-colors shadow-2xs"
+                  className="rounded-xl border border-teal-200/70 bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:border-teal-500 hover:text-teal-900 hover:bg-teal-50/50 transition-all shadow-2xs active:scale-95"
                 >
                   "{q}"
                 </button>
@@ -116,33 +125,48 @@ export const ReportChat: React.FC<ReportChatProps> = ({ report, initialQuestion 
               return (
                 <div
                   key={msg.id}
-                  className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
+                  className={`flex items-start gap-2.5 ${isUser ? 'justify-end' : 'justify-start'}`}
                 >
+                  {!isUser && (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white shrink-0 mt-1 shadow-2xs">
+                      <Bot className="h-4 w-4" />
+                    </div>
+                  )}
+
                   <div
-                    className={`max-w-[85%] rounded-xl p-3 text-xs sm:text-sm leading-relaxed ${
+                    className={`max-w-[85%] rounded-2xl p-3.5 text-xs sm:text-sm leading-relaxed shadow-xs ${
                       isUser
-                        ? 'bg-teal-800 text-white'
-                        : 'bg-white border border-slate-200 text-slate-800 shadow-2xs'
+                        ? 'bg-gradient-to-r from-teal-700 to-cyan-700 text-white rounded-tr-xs'
+                        : 'bg-white border border-slate-200/90 text-slate-800 rounded-tl-xs'
                     }`}
                   >
                     <p className="whitespace-pre-line">{msg.text}</p>
                     <span
-                      className={`block text-[10px] mt-1 text-right ${
+                      className={`block text-[10px] mt-1.5 text-right font-medium ${
                         isUser ? 'text-teal-200' : 'text-slate-400'
                       }`}
                     >
                       {msg.timestamp}
                     </span>
                   </div>
+
+                  {isUser && (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-800 text-white shrink-0 mt-1 shadow-2xs">
+                      <User className="h-4 w-4" />
+                    </div>
+                  )}
                 </div>
               );
             })}
 
             {isLoading && (
-              <div className="flex justify-start">
-                <div className="rounded-xl bg-white border border-slate-200 p-3 text-xs text-slate-500 shadow-2xs flex items-center gap-2">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-teal-800" />
-                  <span>Checking your report data...</span>
+              <div className="flex items-center gap-2.5 justify-start">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white shrink-0 shadow-2xs">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div className="rounded-2xl bg-white border border-slate-200/90 p-3 text-xs text-slate-600 shadow-2xs flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-teal-700" />
+                  <span>Checking your report data and preparing answer...</span>
                 </div>
               </div>
             )}
@@ -154,19 +178,19 @@ export const ReportChat: React.FC<ReportChatProps> = ({ report, initialQuestion 
 
       {/* Error alert */}
       {errorText && (
-        <div className="border-t border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900">
+        <div className="border-t border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-900 font-medium">
           {errorText}
         </div>
       )}
 
       {/* Input container */}
-      <div className="border-t border-slate-200 bg-white p-3">
+      <div className="border-t border-teal-100/70 bg-white p-3.5">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSend();
           }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2.5"
         >
           <input
             type="text"
@@ -174,12 +198,12 @@ export const ReportChat: React.FC<ReportChatProps> = ({ report, initialQuestion 
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
             disabled={isLoading}
-            className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-800 focus:bg-white focus:outline-none"
+            className="flex-1 rounded-xl border border-slate-200/90 bg-slate-50/80 px-4 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-teal-600 focus:bg-white focus:ring-2 focus:ring-teal-500/20 focus:outline-hidden transition-all"
           />
           <button
             type="submit"
             disabled={!inputQuery.trim() || isLoading}
-            className="inline-flex items-center gap-1 rounded-lg bg-teal-800 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-900 disabled:opacity-40 transition-colors"
+            className="btn-shimmer inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-700 to-cyan-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-teal-700/20 hover:shadow-lg disabled:opacity-40 transition-all active:scale-95"
           >
             <Send className="h-3.5 w-3.5" />
             <span>Ask</span>
