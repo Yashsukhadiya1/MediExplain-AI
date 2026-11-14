@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Building2, FileText, ArrowLeft, Upload, Share2, Check, Stethoscope, HelpCircle, Sparkles } from 'lucide-react';
+import { Calendar, Building2, FileText, ArrowLeft, Upload, Share2, Check, Stethoscope, HelpCircle, Sparkles, Bot } from 'lucide-react';
 import { ReportData } from '../types/report';
 import { SummaryCards } from '../components/results/SummaryCards';
 import { AISummaryCard } from '../components/results/AISummaryCard';
@@ -18,6 +18,7 @@ interface ResultsProps {
 export const Results: React.FC<ResultsProps> = ({ report, onAnalyzeAnother }) => {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [activeQuestionTarget, setActiveQuestionTarget] = useState<string | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // If no report analyzed yet
@@ -54,10 +55,7 @@ export const Results: React.FC<ResultsProps> = ({ report, onAnalyzeAnother }) =>
 
   const handleAskAboutTest = (testName: string) => {
     setActiveQuestionTarget(testName);
-    const chatEl = document.getElementById('report-chat-section');
-    if (chatEl) {
-      chatEl.scrollIntoView({ behavior: 'smooth' });
-    }
+    setIsChatOpen(true);
   };
 
   // Collect doctor questions and key observations from out-of-range results
@@ -120,11 +118,20 @@ export const Results: React.FC<ResultsProps> = ({ report, onAnalyzeAnother }) =>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0 self-start">
+          {/* Top Actions: Ask Assistant, Share, Analyze Another */}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start">
+            <button
+              type="button"
+              onClick={() => setIsChatOpen(true)}
+              className="btn-shimmer inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-700 to-cyan-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-teal-700/20 hover:shadow-lg hover:scale-[1.02] transition-all active:scale-95"
+            >
+              <Bot className="h-4 w-4" />
+              <span>Ask Assistant</span>
+            </button>
             <button
               type="button"
               onClick={handleCopyLink}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white/90 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-2xs active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-2xs active:scale-95"
             >
               {copied ? <Check className="h-3.5 w-3.5 text-teal-700" /> : <Share2 className="h-3.5 w-3.5" />}
               <span>{copied ? 'Copied' : 'Share'}</span>
@@ -132,10 +139,10 @@ export const Results: React.FC<ResultsProps> = ({ report, onAnalyzeAnother }) =>
             <button
               type="button"
               onClick={onAnalyzeAnother}
-              className="btn-shimmer inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-700 to-cyan-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-teal-700/20 hover:shadow-lg hover:scale-[1.02] transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white/90 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-2xs active:scale-95"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
-              Analyze another
+              <span>Analyze another</span>
             </button>
           </div>
         </div>
@@ -244,16 +251,6 @@ export const Results: React.FC<ResultsProps> = ({ report, onAnalyzeAnother }) =>
         </RevealOnScroll>
       )}
 
-      {/* Ask About Your Report Chat */}
-      <div id="report-chat-section">
-        <RevealOnScroll direction="up" delay={350}>
-          <ReportChat
-            report={report}
-            initialQuestion={activeQuestionTarget}
-          />
-        </RevealOnScroll>
-      </div>
-
       {/* Action Button: Analyze another report */}
       <div className="pt-6 flex justify-center">
         <button
@@ -268,6 +265,34 @@ export const Results: React.FC<ResultsProps> = ({ report, onAnalyzeAnother }) =>
 
       {/* Medical Safety Disclaimer */}
       <Disclaimer />
+
+      {/* Floating Action Button (FAB) at Bottom-Right */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <button
+          type="button"
+          onClick={() => setIsChatOpen(true)}
+          className="btn-shimmer flex items-center gap-2.5 rounded-full bg-gradient-to-r from-teal-700 via-teal-600 to-cyan-600 px-5 py-3.5 text-sm font-black text-white shadow-2xl shadow-teal-900/40 hover:shadow-teal-900/60 hover:scale-105 active:scale-95 transition-all duration-300 border border-white/40 group"
+          title="Open MediExplain AI Assistant"
+        >
+          <div className="relative flex h-5 w-5 items-center justify-center">
+            <Bot className="h-5 w-5" />
+            <span className="absolute -top-1 -right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
+            </span>
+          </div>
+          <span className="hidden sm:inline">Ask AI Assistant</span>
+          <span className="sm:hidden">Ask AI</span>
+        </button>
+      </div>
+
+      {/* Slide-over Resizable Right Chat Assistant */}
+      <ReportChat
+        report={report}
+        initialQuestion={activeQuestionTarget}
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+      />
     </div>
   );
 };
