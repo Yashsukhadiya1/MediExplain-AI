@@ -2,6 +2,8 @@ from typing import List, Optional, Any
 from pydantic import BaseModel, Field, field_validator
 
 class TestResultModel(BaseModel):
+    model_config = {"extra": "ignore"}
+
     name: str = Field("Unnamed Test", description="Name of the medical or laboratory test")
     result: str = Field("", description="Reported result value as a string (e.g. '10.2' or 'Negative')")
     numericValue: Optional[float] = Field(None, description="Numeric parsed value if applicable")
@@ -45,6 +47,8 @@ class TestResultModel(BaseModel):
         return str(v).strip()
 
 class MedicalTermModel(BaseModel):
+    model_config = {"extra": "ignore"}
+
     term: str = Field("", description="Medical term, acronym, or unit used in the report")
     definition: str = Field("", description="Simple, clear educational definition")
 
@@ -56,6 +60,8 @@ class MedicalTermModel(BaseModel):
         return str(v).strip()
 
 class ReportAnalysisResponse(BaseModel):
+    model_config = {"extra": "ignore"}
+
     reportTitle: str = Field("Medical Laboratory Report", description="Identified report title or panel name")
     reportDate: str = Field("Not specified", description="Date of the report if found, or 'Recent'")
     labName: Optional[str] = Field(None, description="Laboratory or clinic name if found")
@@ -87,6 +93,8 @@ class ReportAnalysisResponse(BaseModel):
         return str(v).strip()
 
 class AskReportRequest(BaseModel):
+    model_config = {"extra": "ignore"}
+
     question: str
     report: ReportAnalysisResponse
 

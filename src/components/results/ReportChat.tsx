@@ -11,10 +11,114 @@ interface ReportChatProps {
 }
 
 const SUGGESTED_QUESTIONS = [
-  'What does my hemoglobin result mean?',
-  'Which results are outside the reference range?',
-  'What does this test measure?',
+  { text: 'What does my hemoglobin result mean?', badge: 'Hemoglobin', color: 'border-teal-200 bg-teal-50/90 text-teal-950 hover:bg-teal-100/80' },
+  { text: 'Which results are outside the reference range?', badge: 'Review Range', color: 'border-amber-200 bg-amber-50/90 text-amber-950 hover:bg-amber-100/80' },
+  { text: 'What questions should I ask my doctor about this report?', badge: 'Doctor Questions', color: 'border-cyan-200 bg-cyan-50/90 text-cyan-950 hover:bg-cyan-100/80' },
 ];
+
+/**
+ * Parses inline **bold**, *italic*, and `code` formatting in Gemini responses.
+ */
+function formatInlineMarkdown(text: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  const regex = /(\*\*.*?\*\*|\*.*?\*|`.*?`)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+    const token = match[0];
+    if (token.startsWith('**') && token.endsWith('**')) {
+      parts.push(
+        <strong key={match.index} className="font-extrabold text-black">
+          {token.slice(2, -2)}
+        </strong>
+      );
+    } else if (token.startsWith('*') && token.endsWith('*')) {
+      parts.push(
+        <em key={match.index} className="italic text-slate-800">
+          {token.slice(1, -1)}
+        </em>
+      );
+    } else if (token.startsWith('`') && token.endsWith('`')) {
+      parts.push(
+        <code key={match.index} className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[11px] text-slate-900 border border-slate-200">
+          {token.slice(1, -1)}
+        </code>
+      );
+    }
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts;
+}
+
+/**
+ * Renders structured Gemini AI responses with clean headings, bullet lists,
+ * and pure black typography exactly like Gemini web UI.
+ */
+function renderGeminiFormattedResponse(text: string): React.ReactNode {
+  const paragraphs = text.split(/\n\n+/);
+
+  return paragraphs.map((block, pIdx) => {
+    const trimmed = block.trim();
+    if (!trimmed) return null;
+
+    // Heading 3 or 2
+    if (trimmed.startsWith('### ')) {
+      return (
+        <h4 key={pIdx} className="text-xs sm:text-sm font-black text-black mt-3 mb-1.5 pb-1 border-b border-slate-100">
+          {trimmed.replace(/^###\s+/, '')}
+        </h4>
+      );
+    }
+    if (trimmed.startsWith('## ')) {
+      return (
+        <h3 key={pIdx} className="text-sm sm:text-base font-black text-black mt-3.5 mb-1.5 pb-1 border-b border-slate-200">
+          {trimmed.replace(/^##\s+/, '')}
+        </h3>
+      );
+    }
+
+    // List items (* item, - item, • item)
+    const lines = trimmed.split('\n');
+    const isList = lines.length > 0 && lines.every((l) => /^[\*\-•\d+\.]\s+/.test(l.trim()));
+
+    if (isList) {
+      return (
+        <ul key={pIdx} className="my-2 space-y-1.5 pl-0.5">
+          {lines.map((line, lIdx) => {
+            const clean = line.trim().replace(/^([\*\-•]|\d+\.)\s+/, '');
+            return (
+              <li key={lIdx} className="flex items-start gap-2 text-xs sm:text-sm text-slate-950 leading-relaxed">
+                <span className="text-teal-600 font-bold shrink-0 mt-0.5 text-xs">•</span>
+                <span className="flex-1 text-slate-950 font-normal">{formatInlineMarkdown(clean)}</span>
+              </li>
+            );
+          })}
+        </ul>
+      );
+    }
+
+    // Regular paragraphs with inline formatting
+    return (
+      <p key={pIdx} className="my-1.5 text-xs sm:text-sm text-slate-950 leading-relaxed font-normal">
+        {lines.map((line, lIdx) => (
+          <React.Fragment key={lIdx}>
+            {lIdx > 0 && <br />}
+            {formatInlineMarkdown(line)}
+          </React.Fragment>
+        ))}
+      </p>
+    );
+  });
+}
 
 export const ReportChat: React.FC<ReportChatProps> = ({
   report,
@@ -133,18 +237,18 @@ export const ReportChat: React.FC<ReportChatProps> = ({
 
   return (
     <>
-      {/* Backdrop overlay */}
+      {/* Click-outside backdrop catcher - COMPLETELY TRANSPARENT, NO black shadow at top */}
       <div
         onClick={onClose}
-        className={`fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-300 ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        className={`fixed inset-0 z-40 bg-transparent transition-opacity duration-200 ${
+          isOpen ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
       />
 
-      {/* Slide-over Right Drawer - Starts below header on mobile (top-16) to avoid navbar collision */}
+      {/* Slide-over Right Drawer - Starts right under navbar on mobile (top-16) with NO top black shadow */}
       <div
         style={{ width: typeof window !== 'undefined' && window.innerWidth < 640 ? '100%' : `${drawerWidth}px`, maxWidth: '100vw' }}
-        className={`fixed top-16 sm:top-0 bottom-0 right-0 z-50 flex flex-col bg-white shadow-2xl border-l border-teal-100 transition-transform duration-300 ease-in-out text-left select-text ${
+        className={`fixed top-16 sm:top-0 bottom-0 right-0 z-50 flex flex-col bg-white border-l border-teal-200/80 shadow-xl shadow-teal-950/10 transition-transform duration-300 ease-in-out text-left select-text ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -157,8 +261,8 @@ export const ReportChat: React.FC<ReportChatProps> = ({
           <div className="h-8 w-1 rounded-full bg-slate-300 group-hover:bg-teal-600 transition-colors" />
         </div>
 
-        {/* Drawer Header - Compact on mobile */}
-        <div className="border-b border-teal-100/80 bg-gradient-to-r from-teal-50/70 via-cyan-50/50 to-white p-2.5 sm:p-4 flex items-center justify-between shrink-0 shadow-2xs">
+        {/* Drawer Header - Clean & compact without dark shadows */}
+        <div className="border-b border-teal-100 bg-gradient-to-r from-teal-50/80 via-cyan-50/50 to-white p-2.5 sm:p-4 flex items-center justify-between shrink-0 shadow-2xs">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-700 via-teal-600 to-cyan-600 text-white shadow-md shadow-teal-700/20 shrink-0">
               <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -207,7 +311,7 @@ export const ReportChat: React.FC<ReportChatProps> = ({
         </div>
 
         {/* Chat Messages Body with overscroll containment */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-4 overscroll-contain bg-gradient-to-b from-slate-50/60 to-white">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-4 overscroll-contain bg-gradient-to-b from-slate-50/40 via-white to-slate-50/20">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center p-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 mb-3 border border-teal-200/60 shadow-2xs">
@@ -220,7 +324,7 @@ export const ReportChat: React.FC<ReportChatProps> = ({
                 Ask anything about your reported test values, reference limits, or medical terms.
               </p>
 
-              <div className="mt-6 flex flex-col gap-2 w-full max-w-sm">
+              <div className="mt-6 flex flex-col gap-2.5 w-full max-w-sm">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-left">
                   Suggested Questions
                 </span>
@@ -228,10 +332,15 @@ export const ReportChat: React.FC<ReportChatProps> = ({
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => handleSend(q)}
-                    className="text-left rounded-xl border border-teal-100 bg-white/95 p-3 text-xs font-semibold text-slate-700 hover:border-teal-500 hover:text-teal-900 hover:bg-teal-50/60 transition-all shadow-2xs active:scale-[0.99]"
+                    onClick={() => handleSend(q.text)}
+                    className={`text-left rounded-xl border p-3 transition-all shadow-2xs active:scale-[0.99] group ${q.color}`}
                   >
-                    "{q}"
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider block opacity-75 mb-0.5">
+                      {q.badge}
+                    </span>
+                    <span className="text-xs font-semibold block leading-snug">
+                      "{q.text}"
+                    </span>
                   </button>
                 ))}
               </div>
@@ -252,16 +361,27 @@ export const ReportChat: React.FC<ReportChatProps> = ({
                     )}
 
                     <div
-                      className={`max-w-[85%] rounded-2xl p-3.5 text-xs sm:text-sm leading-relaxed shadow-xs ${
+                      className={`max-w-[88%] rounded-2xl p-3 sm:p-4 text-xs sm:text-sm leading-relaxed shadow-sm transition-all ${
                         isUser
-                          ? 'bg-gradient-to-r from-teal-700 to-cyan-700 text-white rounded-tr-xs'
-                          : 'bg-white border border-slate-200/90 text-slate-800 rounded-tl-xs'
+                          ? 'bg-gradient-to-r from-teal-700 via-teal-600 to-cyan-600 text-white rounded-tr-xs border border-teal-500/30'
+                          : 'bg-white border border-slate-200/90 text-slate-950 rounded-tl-xs shadow-xs'
                       }`}
                     >
-                      <p className="whitespace-pre-line font-normal">{msg.text}</p>
+                      {/* USER QUESTION: Distinct colorful background with white text */}
+                      {isUser ? (
+                        <p className="font-semibold text-white whitespace-pre-line text-xs sm:text-sm">
+                          {msg.text}
+                        </p>
+                      ) : (
+                        /* GEMINI ANSWER: Pure crisp black text with markdown headings, bold items & bullets */
+                        <div className="text-slate-950">
+                          {renderGeminiFormattedResponse(msg.text)}
+                        </div>
+                      )}
+
                       <span
-                        className={`block text-[10px] mt-1.5 text-right font-medium ${
-                          isUser ? 'text-teal-200' : 'text-slate-400'
+                        className={`block text-[10px] mt-2 text-right font-medium ${
+                          isUser ? 'text-teal-100' : 'text-slate-400'
                         }`}
                       >
                         {msg.timestamp}
@@ -269,7 +389,7 @@ export const ReportChat: React.FC<ReportChatProps> = ({
                     </div>
 
                     {isUser && (
-                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-800 text-white shrink-0 mt-0.5 shadow-2xs">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-800 text-white shrink-0 mt-0.5 shadow-2xs">
                         <User className="h-4 w-4" />
                       </div>
                     )}
@@ -282,9 +402,9 @@ export const ReportChat: React.FC<ReportChatProps> = ({
                   <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600 text-white shrink-0 shadow-2xs">
                     <Bot className="h-4 w-4" />
                   </div>
-                  <div className="rounded-2xl bg-white border border-slate-200/90 p-3 text-xs text-slate-600 shadow-2xs flex items-center gap-2">
+                  <div className="rounded-2xl bg-white border border-slate-200/90 p-3 text-xs text-slate-900 shadow-2xs flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin text-teal-700" />
-                    <span>Analyzing your report findings...</span>
+                    <span>Analyzing with Gemini AI...</span>
                   </div>
                 </div>
               )}
